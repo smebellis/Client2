@@ -23,6 +23,7 @@ int main(int argc, char *argv[]) {
     int portNumber;
     char serverIP[29];
     int filedescription;
+    bool isUpload = true;
 
 
     if (argc < 3) {
@@ -89,20 +90,30 @@ int main(int argc, char *argv[]) {
                 strcpy(buffer, "upload");
                 send(client, buffer, 100, 0);
                 //uploads a file to the server
-                printf("Enter file name to upload to server: ");
-                scanf("%s", filename);
-                filedescription = open(filename, O_RDONLY, 777);
-                if (filedescription == -1) {
-                    printf("No such file on the local directory\n\n");
-                    break;
+                //Keep it in a loop in case the file doesn't exist
+                //You can re-enter a new file name to upload
+                while(1) {
+                    printf("Enter file name to upload to server: ");
+                    scanf("%s", filename);
+                    filedescription = open(filename, O_RDONLY, 777);
+
+                    if (filedescription == -1) {
+                        cout << "No such file on the local directory\n\n" << endl;
+                    }else{
+                        break;
+
+                    }
+
                 }
+
                 strcpy(buffer, filename);
-                send(client, buffer, 100, 0);
+                send(client, buffer, 4096, 0);
                 stat(filename, &obj);
                 size = obj.st_size;
                 send(client, &size, sizeof(int), 0);
                 sendfile(client, filedescription, nullptr, size);
                 recv(client, &status, sizeof(int), 0);
+                //cout << "Status = " << status << endl;
                 if (status) {
                     printf("Upload was successful\n");
                 } else {

@@ -11,7 +11,7 @@ CC = g++
 CXXFLAGS = -g -std=c++11
 
 #####Change to match all .cpp files.  Do not include .h files ####
-OBJS = main.cpp
+OBJS = main.o
 
 ####Change the name of the executable####
 TARGET = client.exe
