@@ -23,7 +23,10 @@ int main(int argc, char *argv[]) {
     int portNumber;
     char serverIP[29];
     int filedescription;
+    char key_press;
+    int ascii_value;
     bool isUpload = true;
+    char key[5];
 
 
     if (argc < 3) {
@@ -52,7 +55,7 @@ int main(int argc, char *argv[]) {
         cout << "Error connecting" << endl;
         exit(1);
     }
-
+    //While loop to keep the connection open
     int i = 1;
     while (1) {
         printf("Enter a choice: \n1 - Download\n2 - Upload\n3 - Catalog\n4 - Quit\n");
@@ -81,10 +84,26 @@ int main(int argc, char *argv[]) {
                     }
                 }
                 write(filedescription, f, size);
+                cout <<  "File was successfully downloaded" << endl << "Received: " << size << " bytes" << endl;
                 close(filedescription);
-                strcpy(buffer, "cat ");
-                strcat(buffer, filename);
-                system(buffer);
+                cout << "Press C to display the contents of the file or ESC to continue " << endl;
+                while (1) {
+                    key_press = fgetc(stdin);
+                    ascii_value = key_press;
+                    if (ascii_value == 67) {
+                        strcpy(buffer, "cat ");
+                        strcat(buffer, filename);
+                        system(buffer);
+                        cout << "Press ESC to continue " << endl;
+                    }else if (ascii_value == 99) {
+                        strcpy(buffer, "cat ");
+                        strcat(buffer, filename);
+                        system(buffer);
+                        cout << "Press ESC to continue " << endl;
+                    }else if (ascii_value == 27){
+                        break;
+                    }
+                }
                 break;
             case 2:
                 strcpy(buffer, "upload");
@@ -101,11 +120,8 @@ int main(int argc, char *argv[]) {
                         cout << "No such file on the local directory\n\n" << endl;
                     }else{
                         break;
-
                     }
-
                 }
-
                 strcpy(buffer, filename);
                 send(client, buffer, 4096, 0);
                 stat(filename, &obj);
@@ -113,7 +129,7 @@ int main(int argc, char *argv[]) {
                 send(client, &size, sizeof(int), 0);
                 sendfile(client, filedescription, nullptr, size);
                 recv(client, &status, sizeof(int), 0);
-                //cout << "Status = " << status << endl;
+
                 if (status) {
                     printf("Upload was successful\n");
                 } else {
@@ -136,8 +152,6 @@ int main(int argc, char *argv[]) {
                 system("chmod 777 temp2.txt");
                 system("cat temp2.txt");
                 system("rm temp2.txt");
-                char key_press;
-                int ascii_value;
                 cout << "Press ESC key then Enter to continue..." << endl;
                 //After displaying the contents of the server director.
                 //Clear the screen for a fresh menu to keep things clean
@@ -161,6 +175,7 @@ int main(int argc, char *argv[]) {
                     printf("Server is shutting down....\n");
                     sleep(2);
                     printf("Server is closed\n");
+                    close(client);
                     exit(0);
                 }
                 printf("Server failed to close connection\n");
